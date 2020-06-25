@@ -1,0 +1,14 @@
+{
+  "name": "rates-wrapper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "osmosis": "^1.1.10"
+  }
+}
