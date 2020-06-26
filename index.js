@@ -1,26 +1,46 @@
-const osmosis = require("osmosis");
 const fs = require("fs");
 
-let savedData = [];
+const TelegramBot = require("node-telegram-bot-api");
+const token = "924594568:AAHrreoO1YUzY975eGiMtTx2T6a1m9HVUcA";
 
-osmosis
-  .get("https://kovalut.ru/kurs/sankt-peterburg/")
-  .find("table.tb-k tr")
-  .set(["td"])
-  .data(function (data) {
-    if (data.length > 5) {
-      data = data.slice(0, 5);
+const bot = new TelegramBot(token, { polling: true });
+
+bot.on("message", (msg) => {
+  const chatId = msg.chat.id;
+  const first_name = msg.chat.first_name;
+
+  if (msg.text) {
+    const text = msg.text.toLowerCase();
+
+    if (~text.indexOf("привет")) {
+      bot.sendMessage(chatId, "Приветик, " + first_name + "!");
+    } else if (~text.indexOf("курс доллара")) {
+      bot.sendMessage(chatId, "Курс доллара \n\t 60.00\n\t 61.00 ");
+    } else {
+      bot.sendMessage(chatId, "Unknown command");
     }
-    if (data.length === 5) {
-      console.log(data);
-      savedData.push(data);
-    }
-  })
-  .done(function () {
-    fs.writeFile("data.json", JSON.stringify(savedData, null, 4), function (
-      err
-    ) {
-      if (err) console.error(err);
-      else console.log("Data Saved to data.json file");
-    });
+  }
+});
+
+bot.onText(/\/start/, (msg, match) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Приветик, " + msg.chat.first_name + "!");
+  openKeyboard(chatId);
+});
+
+function openKeyboard(chatId) {
+  bot.sendMessage(chatId, "Клавиатура открыта", {
+    reply_markup: {
+      keyboard: [
+        // [
+        {
+          text: "Курс доллара",
+        },
+        {
+          text: "Курс Евро",
+        },
+      ],
+      one_time_keyboard: true,
+    },
   });
+}
