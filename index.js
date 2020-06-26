@@ -1,9 +1,12 @@
+require("dotenv").config();
 const fs = require("fs");
 
 const TelegramBot = require("node-telegram-bot-api");
-const token = "924594568:AAHrreoO1YUzY975eGiMtTx2T6a1m9HVUcA";
+const token = process.env.BOTAPI;
 
 const bot = new TelegramBot(token, { polling: true });
+
+let fileContent = JSON.parse(fs.readFileSync("data.json", "utf8"));
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
@@ -15,7 +18,31 @@ bot.on("message", (msg) => {
     if (~text.indexOf("привет")) {
       bot.sendMessage(chatId, "Приветик, " + first_name + "!");
     } else if (~text.indexOf("курс доллара")) {
-      bot.sendMessage(chatId, "Курс доллара \n\t 60.00\n\t 61.00 ");
+      // bot.sendMessage(chatId, "Курс доллара💵");
+      for (let i = 1; i < 6; i++) {
+        bot.sendMessage(
+          chatId,
+          fileContent[i][0] +
+            "\n\t" +
+            fileContent[i][1] +
+            "\n\t" +
+            fileContent[i][2]
+        );
+      }
+    } else if (~text.indexOf("курс евро")) {
+      // bot.sendMessage(chatId, "Курс Евро💶");
+      for (let i = 1; i < 6; i++) {
+        bot.sendMessage(
+          chatId,
+          fileContent[i][0] +
+            "\n\t" +
+            fileContent[i][3] +
+            "\n\t" +
+            fileContent[i][4]
+        );
+      }
+    } else if (~text.indexOf("клав")) {
+      openKeyboard(chatId);
     } else {
       bot.sendMessage(chatId, "Unknown command");
     }
@@ -28,19 +55,19 @@ bot.onText(/\/start/, (msg, match) => {
   openKeyboard(chatId);
 });
 
-function openKeyboard(chatId) {
+const openKeyboard = (chatId) => {
   bot.sendMessage(chatId, "Клавиатура открыта", {
     reply_markup: {
       keyboard: [
-        // [
-        {
-          text: "Курс доллара",
-        },
-        {
-          text: "Курс Евро",
-        },
+        [
+          {
+            text: "Курс Доллара",
+          },
+          {
+            text: "Курс Евро",
+          },
+        ],
       ],
-      one_time_keyboard: true,
     },
   });
-}
+};
