@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "scrap": "node rates-scrapper.js"
+    "scrap": "node rates-scrapper.js && node requestCB.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.0",
     "node-telegram-bot-api": "^0.50.0",
-    "osmosis": "^1.1.10"
+    "osmosis": "^1.1.10",
+    "xml-js": "^1.6.11"
   }
 }

@@ -14,6 +14,8 @@ bot.on("message", (msg) => {
   if (msg.text) {
     const text = msg.text.toLowerCase();
 
+    //CBrates();
+
     if (~text.indexOf("курс доллара")) {
       for (let i = 1; i < 6; i++) {
         bot.sendMessage(
@@ -58,6 +60,11 @@ const openKeyboard = (chatId) => {
           },
           {
             text: "Курс Евро",
+          },
+        ],
+        [
+          {
+            text: "Курс ЦБ",
           },
         ],
       ],
