@@ -58,8 +58,11 @@ bot.on("message", (msg) => {
 });
 
 bot.onText(/\/start/, (msg, match) => {
+  let chatId = msg.chat.id;
   openKeyboard(chatId);
 });
+
+bot.on("polling_error", (msg) => console.log(msg));
 
 bot.onText(/convert (\d.+) (.+) to (.+)/, function (msg, match) {
   let userId = msg.from.id;
