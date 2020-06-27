@@ -5,7 +5,8 @@ const TelegramBot = require("node-telegram-bot-api");
 const token = process.env.BOTAPI;
 const bot = new TelegramBot(token, { polling: true });
 
-let fileContent = JSON.parse(fs.readFileSync("data.json", "utf8"));
+let BankRates = JSON.parse(fs.readFileSync("data.json", "utf8"));
+let CBRates = JSON.parse(fs.readFileSync("cb.json", "utf8")).ValCurs.Valute;
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
@@ -13,34 +14,48 @@ bot.on("message", (msg) => {
 
   if (msg.text) {
     const text = msg.text.toLowerCase();
-
+    let str = "";
     //CBrates();
 
     if (~text.indexOf("курс доллара")) {
       for (let i = 1; i < 6; i++) {
-        bot.sendMessage(
-          chatId,
-          fileContent[i][0] +
-            "\n\t Купить  " +
-            fileContent[i][1] +
-            "\n\t Продать " +
-            fileContent[i][2]
-        );
+        str +=
+          "🏦 " +
+          BankRates[i][0] +
+          "\n\t  Купить  " +
+          BankRates[i][1] +
+          "\n\t  Продать " +
+          BankRates[i][2] +
+          "\n\n";
       }
+      // bot.sendMessage(chatId, str);
     } else if (~text.indexOf("курс евро")) {
       for (let i = 1; i < 6; i++) {
-        bot.sendMessage(
-          chatId,
-          fileContent[i][0] +
-            "\n\t" +
-            fileContent[i][3] +
-            "\n\t" +
-            fileContent[i][4]
-        );
+        str +=
+          "🏦 " +
+          BankRates[i][0] +
+          "\n\t  Купить  " +
+          BankRates[i][3] +
+          "\n\t  Продать " +
+          BankRates[i][4] +
+          "\n\n";
+      }
+      // bot.sendMessage(chatId, str);
+    } else if (~text.indexOf("курс цб")) {
+      for (let i = 0; i < CBRates.length; i++) {
+        str +=
+          CBRates[i].Name._text +
+          " x" +
+          CBRates[i].Nominal._text +
+          "\n  " +
+          CBRates[i].Value._text +
+          "\n\n";
       }
     } else {
-      bot.sendMessage(chatId, "Unknown command");
+      str = "Unknown command";
+      //bot.sendMessage(chatId, "Unknown command");
     }
+    bot.sendMessage(chatId, str);
   }
 });
 
