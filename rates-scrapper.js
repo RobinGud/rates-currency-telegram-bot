@@ -12,7 +12,6 @@ osmosis
       data = data.slice(0, 5);
     }
     if (data.length === 5) {
-      // console.log(data);
       savedData.push(data);
     }
   })

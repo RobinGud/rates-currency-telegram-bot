@@ -10,12 +10,10 @@ let CBRates = JSON.parse(fs.readFileSync("cb.json", "utf8")).ValCurs.Valute;
 
 bot.on("message", (msg) => {
   const chatId = msg.chat.id;
-  const first_name = msg.chat.first_name;
 
-  if (msg.text) {
+  if (msg.text && msg.text[0] !== "/") {
     const text = msg.text.toLowerCase();
     let str = "";
-    //CBrates();
 
     if (~text.indexOf("курс доллара")) {
       for (let i = 1; i < 6; i++) {
@@ -28,7 +26,6 @@ bot.on("message", (msg) => {
           BankRates[i][2] +
           "\n\n";
       }
-      // bot.sendMessage(chatId, str);
     } else if (~text.indexOf("курс евро")) {
       for (let i = 1; i < 6; i++) {
         str +=
@@ -40,10 +37,12 @@ bot.on("message", (msg) => {
           BankRates[i][4] +
           "\n\n";
       }
-      // bot.sendMessage(chatId, str);
     } else if (~text.indexOf("курс цб")) {
       for (let i = 0; i < CBRates.length; i++) {
         str +=
+          "[" +
+          CBRates[i].CharCode._text +
+          "]  " +
           CBRates[i].Name._text +
           " x" +
           CBRates[i].Nominal._text +
@@ -52,21 +51,63 @@ bot.on("message", (msg) => {
           "\n\n";
       }
     } else {
-      str = "Unknown command";
-      //bot.sendMessage(chatId, "Unknown command");
+      str = "Unknown command!";
     }
     bot.sendMessage(chatId, str);
   }
 });
 
 bot.onText(/\/start/, (msg, match) => {
-  const chatId = msg.chat.id;
   openKeyboard(chatId);
-  bot.sendMessage(chatId, "Приветик, " + msg.chat.first_name + "!");
+});
+
+bot.onText(/convert (\d.+) (.+) to (.+)/, function (msg, match) {
+  let userId = msg.from.id;
+  let valuteValue = match[1];
+  let valuteFrom = match[2].toUpperCase();
+  let valuteTo = match[3].toUpperCase();
+  let nominalFrom, nominalTo, valueFrom, valueTo;
+
+  for (let i = 0; i < CBRates.length; i++) {
+    if (CBRates[i].CharCode._text == valuteFrom) {
+      nominalFrom = CBRates[i].Nominal._text;
+      valueFrom = parseFloat(
+        CBRates[i].Value._text.replace(",", ".").replace(" ", "")
+      );
+    }
+
+    if (CBRates[i].CharCode._text == valuteTo) {
+      nominalTo = CBRates[i].Nominal._text;
+      valueTo = parseFloat(
+        CBRates[i].Value._text.replace(",", ".").replace(" ", "")
+      );
+    }
+    if (valuteTo == "RUB") {
+      nominalTo = 1;
+      valueTo = 1;
+    }
+
+    if (valuteFrom == "RUB") {
+      nominalFrom = 1;
+      valueFrom = 1;
+    }
+  }
+
+  if (!valueFrom || !valueTo) {
+    bot.sendMessage(userId, "Невалидная валюта, попробуйте снова!");
+    return;
+  }
+
+  let Result = (
+    ((valuteValue / nominalFrom) * valueFrom * nominalTo) /
+    valueTo
+  ).toFixed(4);
+
+  bot.sendMessage(userId, Result + " " + valuteTo);
 });
 
 const openKeyboard = (chatId) => {
-  bot.sendMessage(chatId, "Клавиатура открыта", {
+  bot.sendMessage(chatId, "Привет", {
     reply_markup: {
       keyboard: [
         [

@@ -25,17 +25,3 @@ fetch("https://www.cbr-xml-daily.ru/daily_utf8.xml")
   .catch(function (err) {
     console.log("Fetch Error :-S", err);
   });
-
-let fileContent = JSON.parse(fs.readFileSync("cb.json", "utf8")).ValCurs.Valute;
-let str = "";
-for (let i = 0; i < fileContent.length; i++) {
-  str +=
-    fileContent[i].Name._text +
-    " x" +
-    fileContent[i].Nominal._text +
-    "\n  " +
-    fileContent[i].Value._text +
-    "\n\n";
-}
-
-console.log(str);
