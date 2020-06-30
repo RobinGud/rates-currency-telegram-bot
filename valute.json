@@ -1,0 +1,10 @@
+{
+  "dollar": {
+    "name": ["доллар", "долар", "usd", ",бакс", "dollar", "dolar"],
+    "url": "usd"
+  },
+  "euro": {
+    "name": ["евро", "euro", "eur"],
+    "url": "usd"
+  }
+}
