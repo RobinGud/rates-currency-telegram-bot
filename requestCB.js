@@ -1,5 +1,5 @@
-const fetch = require("node-fetch");
-const fs = require("fs");
+//const fetch = require("node-fetch");
+//const fs = require("fs");
 // var convert = require("xml-js");
 
 // fetch("https://www.cbr-xml-daily.ru/daily_utf8.xml")
@@ -72,49 +72,54 @@ const fs = require("fs");
 
 const Iconv = require("iconv").Iconv;
 const request = require("request");
+const parser = require("fast-xml-parser");
 
-request(
-  {
-    uri: "http://www.cbr.ru/scripts/XML_daily.asp?date_req=02/03/2002",
-    method: "GET",
-    encoding: "binary",
-  },
-  function (error, response, body) {
-    if (response.statusCode == 200) {
-      body = new Buffer(body, "binary");
-      conv = Iconv("windows-1251", "utf8");
-      body = conv.convert(body).toString();
-      console.log(body);
-      var parser = require("fast-xml-parser");
-      // var he = require("he");
+let CBReq = (date) => {
+  request(
+    {
+      uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
+      method: "GET",
+      encoding: "binary",
+    },
+    function (error, response, body) {
+      if (response.statusCode == 200) {
+        let conv = Iconv("windows-1251", "utf8");
+        body = new Buffer(body, "binary");
+        body = conv.convert(body).toString();
+        //console.log(body);
+        // var he = require("he");
 
-      // var options = {
-      //   attributeNamePrefix: "@_",
-      //   attrNodeName: "attr", //default is 'false'
-      //   textNodeName: "#text",
-      //   ignoreAttributes: true,
-      //   ignoreNameSpace: false,
-      //   allowBooleanAttributes: false,
-      //   parseNodeValue: true,
-      //   parseAttributeValue: false,
-      //   trimValues: true,
-      //   cdataTagName: "__cdata", //default is 'false'
-      //   cdataPositionChar: "\\c",
-      //   parseTrueNumberOnly: false,
-      //   arrayMode: false, //"strict"
-      //   // attrValueProcessor: (val, attrName) =>
-      //   //   he.decode(val, { isAttributeValue: true }), //default is a=>a
-      //   // tagValueProcessor: (val, tagName) => he.decode(val), //default is a=>a
-      //   stopNodes: ["parse-me-as-string"],
-      // };
+        // var options = {
+        //   attributeNamePrefix: "@_",
+        //   attrNodeName: "attr", //default is 'false'
+        //   textNodeName: "#text",
+        //   ignoreAttributes: true,
+        //   ignoreNameSpace: false,
+        //   allowBooleanAttributes: false,
+        //   parseNodeValue: true,
+        //   parseAttributeValue: false,
+        //   trimValues: true,
+        //   cdataTagName: "__cdata", //default is 'false'
+        //   cdataPositionChar: "\\c",
+        //   parseTrueNumberOnly: false,
+        //   arrayMode: false, //"strict"
+        //   // attrValueProcessor: (val, attrName) =>
+        //   //   he.decode(val, { isAttributeValue: true }), //default is a=>a
+        //   // tagValueProcessor: (val, tagName) => he.decode(val), //default is a=>a
+        //   stopNodes: ["parse-me-as-string"],
+        // };
 
-      if (parser.validate(body) === true) {
-        //optional (it'll return an object in case it's not valid)
-        var jsonObj = parser.parse(body);
+        if (parser.validate(body) === true) {
+          //optional (it'll return an object in case it's not valid)
+          var jsonObj = parser.parse(body);
+        }
+        console.log(jsonObj.ValCurs.Valute[1]);
+      } else {
+        console.log(error);
       }
-      console.log(jsonObj.ValCurs.Valute[1]);
-    } else {
-      console.log(error);
     }
-  }
-);
+  );
+};
+
+let dateReq = "02/03/2004";
+CBReq(dateReq);
