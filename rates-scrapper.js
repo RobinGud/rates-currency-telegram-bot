@@ -1,5 +1,5 @@
-// const osmosis = require("osmosis");
-// const fs = require("fs");
+const osmosis = require("osmosis");
+const fs = require("fs");
 
 // let savedData = [];
 
@@ -23,3 +23,27 @@
 //       else console.log("Data Saved to data.json file");
 //     });
 //   });
+
+// osmosis
+//   .get("https://www.banki.ru/products/currency/cash/gbp/sankt-peterburg/")
+//   .find("div.exchange-calculator-rates")
+//   .set(".trades-table__name > a")
+//   .data(console.log);
+
+let town = "spb";
+let valute = "gbp";
+
+let savedData = [];
+
+let banksRatesReq = (town, valute) =>
+  osmosis
+    .get(`https://${town}.bankiros.ru/currency/${valute}`)
+    .find("tbody > tr.productBank")
+    .set(["td"])
+    .data((data) => {
+      savedData.push(data);
+      // console.log(data.length);
+    })
+    .done(() => console.log(savedData[0][1]));
+
+banksRatesReq(town, valute);
