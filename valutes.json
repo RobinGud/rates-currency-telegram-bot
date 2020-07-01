@@ -5,6 +5,6 @@
   },
   "euro": {
     "name": ["евро", "euro", "eur"],
-    "url": "usd"
+    "url": "eur"
   }
 }

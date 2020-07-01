@@ -1,5 +1,5 @@
 const osmosis = require("osmosis");
-const fs = require("fs");
+// const fs = require("fs");
 
 // let savedData = [];
 

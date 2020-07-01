@@ -3,7 +3,7 @@ const fs = require("fs");
 
 const TelegramBot = require("node-telegram-bot-api");
 const token = process.env.BOTAPI;
-// const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { polling: true });
 
 // let BankRates = JSON.parse(fs.readFileSync("data.json", "utf8"));
 // let CBRates = JSON.parse(fs.readFileSync("cb.json", "utf8")).ValCurs.Valute;
@@ -131,107 +131,105 @@ const token = process.env.BOTAPI;
 //   });
 // };
 
-let jsonValutes = {
-  dollar: {
-    name: ["доллар", "долар", "usd", ",бакс", "dollar", "dolar", "зелен"],
-    url: "usd",
-  },
-  euro: {
-    name: ["евро", "euro", "eur"],
-    url: "eur",
-  },
-};
-
 // const ex = (el) => /usd/.test(el);
-let str = "евро купить зелен";
+// let str = "евро купить зелен";
+// let parseValute = (text) => {
+//   for (let valute in jsonValutes) {
+//     if (jsonValutes[valute].name.some((el) => str.includes(el))) {
+//       // console.log(jsonValutes[valute].url);
+//       return jsonValutes[valute].url;
+//     }
+//   }
+// };
 
-for (let valute in jsonValutes) {
-  if (jsonValutes[valute].name.some((el) => str.includes(el))) {
-    console.log(jsonValutes[valute].url);
-    break;
+let parse = (text, json) => {
+  for (let obj in json) {
+    if (json[obj].name.some((el) => text.includes(el))) {
+      // console.log(jsonValutes[valute].url);
+      return json[obj].url;
+    }
   }
-}
-
-let jsonTowns = {
-  moscow: {
-    name: ["москв", "мск", "moscow", "MSC", "MSK"],
-    url: "moskva",
-  },
-  saintpetersburg: {
-    name: ["санкт-петербург", "питер", "спб", "spb", "ленинград"],
-    url: "spb",
-  },
 };
 
-let str1 = "в питере пить";
+// let str1 = "в питере пить";
 
-for (let town in jsonTowns) {
-  if (jsonTowns[town].name.some((el) => str1.includes(el))) {
-    console.log(jsonTowns[town].url);
-    break;
-  }
-}
+// for (let town in jsonTowns) {
+//   if (jsonTowns[town].name.some((el) => str1.includes(el))) {
+//     console.log(jsonTowns[town].url);
+//     break;
+//   }
+// }
 
-let str2 = "2 янв 07";
-let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
-let match = dateRegex.exec(str2);
-// console.log(match[1], match[2], match[5]);
-let day = match[1];
-if (day < 10) {
-  day = "0" + day.toString();
-}
+// let str2 = "2 янв 07";
 
-let month = match[2];
-if (parseInt(match[2]) >= 0) {
-  month = match[2];
-} else {
-  if (match[2] == "янв" || match[2] == "январь") {
-    month = "01";
+let parseDate = (text) => {
+  let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
+  let match = dateRegex.exec(text);
+  // console.log(match[1], match[2], match[5]);
+  let day = match[1];
+  if (day < 10) {
+    day = "0" + day.toString();
   }
-  if (match[2] == "фев" || match[2] == "февраль") {
-    month = "02";
+  let month = match[2];
+  if (parseInt(match[2]) >= 0) {
+    month = match[2];
+  } else {
+    if (match[2] == "янв" || match[2] == "январь") {
+      month = "01";
+    }
+    if (match[2] == "фев" || match[2] == "февраль") {
+      month = "02";
+    }
+    if (match[2] == "мар" || match[2] == "марта") {
+      month = "03";
+    }
+    if (match[2] == "апр" || match[2] == "апреля") {
+      month = "04";
+    }
+    if (match[2] == "мая") {
+      month = "05";
+    }
+    if (match[2] == "июн" || match[2] == "июня") {
+      month = "06";
+    }
+    if (match[2] == "июл" || match[2] == "июля") {
+      month = "07";
+    }
+    if (match[2] == "авг" || match[2] == "августа") {
+      month = "08";
+    }
+    if (match[2] == "сен" || match[2] == "сентябрь") {
+      month = "09";
+    }
+    if (match[2] == "окт" || match[2] == "октября") {
+      month = "10";
+    }
+    if (match[2] == "ноя" || match[2] == "ноября") {
+      month = "11";
+    }
+    if (match[2] == "дек" || match[2] == "декабря") {
+      month = "12";
+    }
   }
-  if (match[2] == "мар" || match[2] == "марта") {
-    month = "03";
+  let year = match[5];
+  if (!year) {
+    year = new Date().getFullYear();
+  } else if (year < 100) {
+    year = 2000 + match[5];
   }
-  if (match[2] == "апр" || match[2] == "апреля") {
-    month = "04";
-  }
-  if (match[2] == "мая") {
-    month = "05";
-  }
-  if (match[2] == "июн" || match[2] == "июня") {
-    month = "06";
-  }
-  if (match[2] == "июл" || match[2] == "июля") {
-    month = "07";
-  }
-  if (match[2] == "авг" || match[2] == "августа") {
-    month = "08";
-  }
-  if (match[2] == "сен" || match[2] == "сентябрь") {
-    month = "09";
-  }
-  if (match[2] == "окт" || match[2] == "октября") {
-    month = "10";
-  }
-  if (match[2] == "ноя" || match[2] == "ноября") {
-    month = "11";
-  }
-  if (match[2] == "дек" || match[2] == "декабря") {
-    month = "12";
-  }
-}
-let year;
-if (match[5] == "undefined" || match[5] < 2000) {
-  year = new Date().getFullYear();
-} else {
-  year = match[5];
-}
+  return day + "/" + month + "/" + year;
+};
 
-console.log(day + "/" + month + "/" + year);
+let jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
+let jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
 
-// bot.onText(/курс|curs/, (msg) => {
-//   let chatId = msg.chat.id;
-//   bot.sendMessage(chatId, "Hello");
-// });
+// parseDate("22 июня");
+
+bot.onText(/курс|curs|Курс|Curs/, (msg) => {
+  let chatId = msg.chat.id;
+  text = msg.text.toLowerCase();
+  let valute = parse(text, jsonValutes);
+  let town = parse(text, jsonTowns);
+  let date = parseDate(text);
+  bot.sendMessage(chatId, valute + " " + town + " " + date);
+});
