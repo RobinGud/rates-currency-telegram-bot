@@ -1,4 +1,5 @@
 const osmosis = require("osmosis");
+var Sync = require("sync");
 // const fs = require("fs");
 
 // let savedData = [];
@@ -30,20 +31,55 @@ const osmosis = require("osmosis");
 //   .set(".trades-table__name > a")
 //   .data(console.log);
 
-let town = "spb";
-let valute = "gbp";
+let town = "spb.";
+let valute = "usd";
 
-let savedData = [];
-
-let banksRatesReq = (town, valute) =>
-  osmosis
-    .get(`https://${town}.bankiros.ru/currency/${valute}`)
+let banksRatesReq = async (town, valute, a) => {
+  await osmosis
+    .get(`https://${town}bankiros.ru/currency/${valute}`)
     .find("tbody > tr.productBank")
     .set(["td"])
     .data((data) => {
-      savedData.push(data);
+      a.push(data);
       // console.log(data.length);
     })
-    .done(() => console.log(savedData[0][1]));
+    .done(() => {
+      // console.log(savedData);
+      // return savedData;
+    });
+  // console.log(savedData);
+  // return savedData;
+};
 
-banksRatesReq(town, valute);
+// let banksRatesReq = (town, valute) =>
+//   osmosis
+//     .get(`https://${town}bankiros.ru/currency/${valute}`)
+//     .find("table.non-standard > tr")
+//     // .set(["td"])
+//     .set(["a", "span.conv-val"])
+//     .data((data) => {
+//       if (data.length == 7) {
+//         savedData.push([
+//           data[0].toUpperCase(),
+//           data[1],
+//           data[3],
+//           data[2],
+//           data[4],
+//         ]);
+//       }
+//       console.log(data);
+//     })
+//     .done(() => {
+//       console.log(savedData);
+//     });
+
+// let a = banksRatesReq(town, valute);
+// console.log(a);
+
+// banksRatesReq(town, valute);
+// console.log(savedData);
+(async function () {
+  let a = [];
+  await banksRatesReq(town, valute, a);
+  console.log(a);
+})();

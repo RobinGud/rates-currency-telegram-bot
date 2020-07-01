@@ -1,10 +1,10 @@
 {
   "moscow": {
     "name": ["москв", "мск", "moscow", "MSC", "MSK"],
-    "url": "moskva"
+    "url": "moskva."
   },
   "saint-petersburg": {
     "name": ["санкт-петербург", "питер", "спб", "spb"],
-    "url": "spb"
+    "url": "spb."
   }
 }

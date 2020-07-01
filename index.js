@@ -149,6 +149,7 @@ let parse = (text, json) => {
       return json[obj].url;
     }
   }
+  return "";
 };
 
 // let str1 = "в питере пить";

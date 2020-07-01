@@ -19,6 +19,7 @@
     "node-telegram-bot-api": "^0.50.0",
     "osmosis": "^1.1.10",
     "request": "^2.88.2",
+    "sync": "^0.2.5",
     "windows-1251": "^1.0.0",
     "xml-js": "^1.6.11",
     "xmldom": "^0.3.0"
