@@ -1,5 +1,5 @@
-const osmosis = require("osmosis");
-var Sync = require("sync");
+// const osmosis = require("osmosis");
+// var Sync = require("sync");
 // const fs = require("fs");
 
 // let savedData = [];
@@ -31,35 +31,36 @@ var Sync = require("sync");
 //   .set(".trades-table__name > a")
 //   .data(console.log);
 
-let town = "spb.";
-let valute = "usd";
+// let town = "spb.";
+// let valute = "usd";
 
-let banksRatesReq = async (town, valute, a) => {
-  await osmosis
-    .get(`https://${town}bankiros.ru/currency/${valute}`)
-    .find("tbody > tr.productBank")
-    .set(["td"])
-    .data((data) => {
-      a.push(data);
-      // console.log(data.length);
-    })
-    .done(() => {
-      // console.log(savedData);
-      // return savedData;
-    });
-  // console.log(savedData);
-  // return savedData;
-};
-
-// let banksRatesReq = (town, valute) =>
-//   osmosis
+// let parseBanksRatesOneValute = async (town, valute, resultString) => {
+//   await osmosis
 //     .get(`https://${town}bankiros.ru/currency/${valute}`)
+//     .find("tbody > tr.productBank")
+//     .set(["td"])
+//     .data((data) => {
+//       resultString +=
+//         "" + data[0] + "\n Покупка " + data[1] + "\n Продажа " + data[2] + "\n";
+//       // console.log(resultString);
+//     });
+//   // .done(() => {
+//   // console.log(savedData);
+//   // return savedData;
+//   // });
+//   // console.log(savedData);
+//   // return savedData;
+// };
+
+// let parseBanksRatesAllValutes = async (town, resultArray) =>
+//   await osmosis
+//     .get(`https://${town}bankiros.ru/currency/`)
 //     .find("table.non-standard > tr")
 //     // .set(["td"])
 //     .set(["a", "span.conv-val"])
 //     .data((data) => {
 //       if (data.length == 7) {
-//         savedData.push([
+//         resultArray.push([
 //           data[0].toUpperCase(),
 //           data[1],
 //           data[3],
@@ -67,19 +68,39 @@ let banksRatesReq = async (town, valute, a) => {
 //           data[4],
 //         ]);
 //       }
-//       console.log(data);
-//     })
-//     .done(() => {
-//       console.log(savedData);
+//       // console.log(data);
 //     });
+// // .done(() => {
+// //   console.log(savedData);
+// // });
 
 // let a = banksRatesReq(town, valute);
 // console.log(a);
 
 // banksRatesReq(town, valute);
 // console.log(savedData);
-(async function () {
-  let a = [];
-  await banksRatesReq(town, valute, a);
-  console.log(a);
-})();
+// let ParseBanksRates = async function (town, valute, res) {
+//   if (valute == "") {
+//     await parseBanksRatesAllValutes(town, res);
+//     console.log(res);
+//   } else {
+//     await parseBanksRatesOneValute(town, valute, res);
+//     console.log(res);
+//   }
+//   foo = res;
+// };
+
+// a();
+// const myFunction = (user) => {
+//   console.log(`Hello, ${user}!`);
+// };
+
+// const b = (user) => {
+//   console.log(`Hello, ${user}!`);
+// };
+
+// export { sayHi };
+
+// export default sayHi;
+
+// module.exports.Hello = { ParseBanksRates };

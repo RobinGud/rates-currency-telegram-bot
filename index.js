@@ -164,55 +164,66 @@ let parse = (text, json) => {
 // let str2 = "2 янв 07";
 
 let parseDate = (text) => {
+  let day, month, year;
   let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
   let match = dateRegex.exec(text);
-  // console.log(match[1], match[2], match[5]);
-  let day = match[1];
+  if (match) {
+    console.log(match[1], match[2], match[5], "sdada");
+    day = match[1];
+    month = match[2];
+    year = match[5];
+  }
+  // console.log(match);
+  // let day = match[1];
+  if (!day) {
+    day = new Date().getDay;
+  }
   if (day < 10) {
     day = "0" + day.toString();
   }
-  let month = match[2];
-  if (parseInt(match[2]) >= 0) {
+  if (!month) {
+    month = new Date().getMonth;
+  }
+  if (parseInt(month) >= 0) {
     month = match[2];
   } else {
-    if (match[2] == "янв" || match[2] == "январь") {
+    if (month == "янв" || month == "январь") {
       month = "01";
     }
-    if (match[2] == "фев" || match[2] == "февраль") {
+    if (month == "фев" || month == "февраль") {
       month = "02";
     }
-    if (match[2] == "мар" || match[2] == "марта") {
+    if (month == "мар" || month == "марта") {
       month = "03";
     }
-    if (match[2] == "апр" || match[2] == "апреля") {
+    if (month == "апр" || month == "апреля") {
       month = "04";
     }
-    if (match[2] == "мая") {
+    if (month == "мая") {
       month = "05";
     }
-    if (match[2] == "июн" || match[2] == "июня") {
+    if (month == "июн" || month == "июня") {
       month = "06";
     }
-    if (match[2] == "июл" || match[2] == "июля") {
+    if (month == "июл" || month == "июля") {
       month = "07";
     }
-    if (match[2] == "авг" || match[2] == "августа") {
+    if (month == "авг" || month == "августа") {
       month = "08";
     }
-    if (match[2] == "сен" || match[2] == "сентябрь") {
+    if (month == "сен" || month == "сентябрь") {
       month = "09";
     }
-    if (match[2] == "окт" || match[2] == "октября") {
+    if (month == "окт" || month == "октября") {
       month = "10";
     }
-    if (match[2] == "ноя" || match[2] == "ноября") {
+    if (month == "ноя" || month == "ноября") {
       month = "11";
     }
-    if (match[2] == "дек" || match[2] == "декабря") {
+    if (month == "дек" || month == "декабря") {
       month = "12";
     }
   }
-  let year = match[5];
   if (!year) {
     year = new Date().getFullYear();
   } else if (year < 100) {
@@ -225,12 +236,73 @@ let jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
 let jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
 
 // parseDate("22 июня");
+// const mod = require("./rates-scrapper.js");
+// import sayHi from "./rates-scrapper";
+const osmosis = require("osmosis");
+
+let parseBanksRatesOneValute = (chatId, town, valute) => {
+  let resultString = "";
+  osmosis
+    .get(`https://${town}bankiros.ru/currency/${valute}`)
+    .find("tbody > tr.productBank")
+    .set(["td"])
+    .data((data) => {
+      resultString +=
+        "" +
+        data[0] +
+        "\n   Покупка  " +
+        data[1] +
+        "\n   Продажа " +
+        data[2] +
+        "\n\n";
+      // console.log(resultString);
+    })
+    .done(() => bot.sendMessage(chatId, resultString));
+};
+
+let parseBanksRatesAllValutes = (chatId, town) => {
+  let resultString = "Лучшие курсы банков:\n\n";
+  osmosis
+    .get(`https://${town}bankiros.ru/currency/`)
+    .find("table.non-standard > tr")
+    // .set(["td"])
+    .set(["a", "span.conv-val"])
+    .data((data) => {
+      if (data.length == 6) {
+        resultString +=
+          "" +
+          data[0].toUpperCase() +
+          "\n " +
+          data[1] +
+          "\n   Покупка    " +
+          data[3] +
+          "\n " +
+          data[2] +
+          "\n   Продажа   " +
+          data[4] +
+          "\n\n";
+      }
+      // console.log(data);
+    })
+    .done(() => bot.sendMessage(chatId, resultString));
+};
 
 bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   let chatId = msg.chat.id;
-  text = msg.text.toLowerCase();
+  let text = msg.text.toLowerCase();
   let valute = parse(text, jsonValutes);
   let town = parse(text, jsonTowns);
   let date = parseDate(text);
+  // mod.Hello.myFunction(text);
+  // let b = "";
+  if (valute) {
+    parseBanksRatesAllValutes(chatId, valute);
+  } else {
+    parseBanksRatesOneValute(chatId, town, valute);
+  }
+  // mod.Hello.ParseBanksRates("spb.", "usd", b).then(bot.sendMessage(chatId, b));
+
   bot.sendMessage(chatId, valute + " " + town + " " + date);
 });
+
+bot.on("polling_error", (msg) => console.log(msg));
