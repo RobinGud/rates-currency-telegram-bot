@@ -176,15 +176,16 @@ let parseDate = (text) => {
   // console.log(match);
   // let day = match[1];
   if (!day) {
-    day = new Date().getDay;
+    day = new Date().getDate();
+    console.log(day);
   }
   if (day < 10) {
     day = "0" + day.toString();
   }
   if (!month) {
-    month = new Date().getMonth;
-  }
-  if (parseInt(month) >= 0) {
+    month = "0" + (new Date().getMonth() + 1);
+    console.log(month);
+  } else if (parseInt(month) >= 0) {
     month = match[2];
   } else {
     if (month == "янв" || month == "январь") {
@@ -226,6 +227,7 @@ let parseDate = (text) => {
   }
   if (!year) {
     year = new Date().getFullYear();
+    console.log(year);
   } else if (year < 100) {
     year = 2000 + match[5];
   }
@@ -295,7 +297,10 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   let date = parseDate(text);
   // mod.Hello.myFunction(text);
   // let b = "";
-  if (valute) {
+  // console.log(
+  //   text + "\n valute " + valute + "\n town " + town + "\n date " + date
+  // );
+  if (!town) {
     parseBanksRatesAllValutes(chatId, valute);
   } else {
     parseBanksRatesOneValute(chatId, town, valute);
