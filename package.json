@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
-    "scrap": "node rates-scrapper.js && node requestCB.js"
+    "start": "node index"
   },
   "author": "",
   "license": "ISC",

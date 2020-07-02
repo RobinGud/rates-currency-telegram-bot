@@ -1,6 +1,6 @@
 {
   "dollar": {
-    "vocabulary": ["доллар", "долар", "usd", ",бакс", "dollar", "dolar"],
+    "vocabulary": ["доллар", "долар", "usd", "бакс", "dollar", "dolar"],
     "url": "usd",
     "name": "доллара"
   },
