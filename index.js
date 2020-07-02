@@ -343,8 +343,8 @@ let CBReq = (chatId, date) => {
 bot.onText(/convert (\d.+) (.+) to (.+)/, function (msg, match) {
   let userId = msg.from.id;
   let valuteValue = match[1];
-  let valuteFrom = match[2];
-  let valuteTo = match[3];
+  let valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
+  let valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
   let date = parseDate(" ");
   // console.log(valuteValue, valuteFrom, valuteTo);
   let nominalFrom, nominalTo, valueFrom, valueTo;
