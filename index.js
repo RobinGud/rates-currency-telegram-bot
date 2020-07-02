@@ -270,6 +270,7 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
 
 let parseBanksRatesAllValutes = (chatId, town) => {
   let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
+  // console.log("i running");
   osmosis
     .get(`https://${town.url}bankiros.ru/currency/`)
     .find("table.non-standard > tr")
@@ -338,6 +339,77 @@ let CBReq = (chatId, date) => {
     }
   );
 };
+
+bot.onText(/convert (\d.+) (.+) to (.+)/, function (msg, match) {
+  let userId = msg.from.id;
+  let valuteValue = match[1];
+  let valuteFrom = match[2];
+  let valuteTo = match[3];
+  let date = parseDate(" ");
+  // console.log(valuteValue, valuteFrom, valuteTo);
+  let nominalFrom, nominalTo, valueFrom, valueTo;
+
+  request(
+    {
+      uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
+      method: "GET",
+      encoding: "binary",
+    },
+    function (error, response, body) {
+      if (response.statusCode == 200) {
+        let conv = Iconv("windows-1251", "utf8");
+        body = new Buffer(body, "binary");
+        body = conv.convert(body).toString();
+
+        if (parser.validate(body) === true) {
+          //optional (it'll return an object in case it's not valid)
+          var jsonObj = parser.parse(body).ValCurs.Valute;
+          // console.log(jsonObj);
+          // bot.sendMessage(userId, "ddvdv" + jsonObj);
+          for (let i = 0; i < jsonObj.length; i++) {
+            // console.log(jsonObj[i].CharCode.toLowerCase(), val);
+            if (jsonObj[i].CharCode.toLowerCase() == valuteFrom) {
+              nominalFrom = jsonObj[i].Nominal;
+              valueFrom = parseFloat(
+                jsonObj[i].Value.replace(",", ".").replace(" ", "")
+              );
+            }
+
+            if (jsonObj[i].CharCode.toLowerCase() == valuteTo) {
+              nominalTo = jsonObj[i].Nominal;
+              valueTo = parseFloat(
+                jsonObj[i].Value.replace(",", ".").replace(" ", "")
+              );
+            }
+            if (valuteTo == "RUB") {
+              nominalTo = 1;
+              valueTo = 1;
+            }
+
+            if (valuteFrom == "RUB") {
+              nominalFrom = 1;
+              valueFrom = 1;
+            }
+          }
+
+          if (!valueFrom || !valueTo) {
+            bot.sendMessage(userId, "Невалидная валюта, попробуйте снова!");
+            return;
+          }
+
+          let Result = (
+            ((valuteValue / nominalFrom) * valueFrom * nominalTo) /
+            valueTo
+          ).toFixed(4);
+
+          bot.sendMessage(userId, Result + " " + valuteTo);
+        }
+      } else {
+        console.log(error);
+      }
+    }
+  );
+});
 
 bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   let chatId = msg.chat.id;
