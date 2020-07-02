@@ -447,8 +447,48 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   //bot.sendMessage(chatId, valute + " " + town + " " + date);
 });
 
-// bot.onText(/\/start/, (msg) => {
-//   let chatId = msg.chat.id;
-// });
+bot.onText(/\/start/, (msg) => {
+  let chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Добрый день", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Список городов и валют",
+            callback_data: "/list",
+          },
+        ],
+        [
+          {
+            text: "Справка",
+            callback_data: "/help",
+          },
+        ],
+      ],
+    },
+  });
+});
+
+bot.on("callback_query", (query) => {
+  const chatId = query.message.chat.id;
+  if (query.data === "/help") {
+    bot.sendMessage(
+      chatId,
+      "Для Получения курса Цб на конкретную дату:\n\tкурс цб {дата}\n\tНапример: курс цб 22 июня 2020\n\n" +
+        "Для получения курса валюты в регионе:\n\tкурс {валюта} {город}\n\tНапример: курс евро в спб\n\n" +
+        "Для получения лучших курсов всех валют в регионе:\n\tкурс {город}\n\tНапример: курс в Ижевске\n\n" +
+        "Для конвертации валюты по курсу ЦБ:\n\t{количество} {валюта} в {валюта}\n\tНапример: 100 баксов в фунты"
+    );
+  }
+  if (query.data === "/list") {
+    bot.sendMessage(
+      chatId,
+      "Города:\n\tМосква\n\tСпб\n\tЕкб\n\tОренбург\n\tНовосибирск\n\tТомск\n\tОмск\n\tЧелябинск\n\t" +
+        "Ростов\n\tКрасноярск\n\tВоронеж\n\tВолгоград\n\tКраснодар\n\tСаратов\n\tВладивосток\n\tИжевск\n\tБарнаул\n\t" +
+        "Иркутск\n\tУльяновск\n\tХабаровск\n\tКазань\n\tСамара\n\tУфа\n\tПермь\n\tТюмень\n\tТольятти\n\tЯрославль\n\tМахачкала\n\tНижний Новгород\n\n" +
+        "Валюты: \n\tдоллар \n\tевро \n\tфунт стерлингов \n\tбелоруский рубль \n\tпольский злотый \n\tшвейцарский франк \n\tяпонский йен"
+    );
+  }
+});
 
 bot.on("polling_error", (msg) => console.log(msg));
