@@ -289,6 +289,50 @@ let parseBanksRatesAllValutes = (chatId, town) => {
     .done(() => bot.sendMessage(chatId, resultString));
 };
 
+const Iconv = require("iconv").Iconv;
+const request = require("request");
+const parser = require("fast-xml-parser");
+
+let CBReq = (chatId, date) => {
+  let resultString = "";
+  request(
+    {
+      uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
+      method: "GET",
+      encoding: "binary",
+    },
+    function (error, response, body) {
+      if (response.statusCode == 200) {
+        let conv = Iconv("windows-1251", "utf8");
+        body = new Buffer(body, "binary");
+        body = conv.convert(body).toString();
+
+        if (parser.validate(body) === true) {
+          //optional (it'll return an object in case it's not valid)
+          var jsonObj = parser.parse(body).ValCurs.Valute;
+        }
+        // console.log(jsonObj[1]);
+        for (let i = 0; i < jsonObj.length; i++) {
+          resultString +=
+            "[" +
+            jsonObj[i].CharCode +
+            "]  " +
+            jsonObj[i].Name +
+            " x" +
+            jsonObj[i].Nominal +
+            "\n  " +
+            jsonObj[i].Value +
+            "\n\n";
+        }
+        // console.log(resultString);
+        bot.sendMessage(chatId, resultString);
+      } else {
+        console.log(error);
+      }
+    }
+  );
+};
+
 bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   let chatId = msg.chat.id;
   let text = msg.text.toLowerCase();
@@ -300,14 +344,16 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   // console.log(
   //   text + "\n valute " + valute + "\n town " + town + "\n date " + date
   // );
-  if (!town) {
-    parseBanksRatesAllValutes(chatId, valute);
+  if (/цб/.test(text)) {
+    CBReq(chatId, date);
+  } else if (!valute) {
+    parseBanksRatesAllValutes(chatId, town);
   } else {
     parseBanksRatesOneValute(chatId, town, valute);
   }
   // mod.Hello.ParseBanksRates("spb.", "usd", b).then(bot.sendMessage(chatId, b));
 
-  bot.sendMessage(chatId, valute + " " + town + " " + date);
+  //bot.sendMessage(chatId, valute + " " + town + " " + date);
 });
 
 bot.on("polling_error", (msg) => console.log(msg));
