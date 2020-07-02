@@ -1,10 +1,12 @@
 {
   "moscow": {
-    "name": ["москв", "мск", "moscow", "MSC", "MSK"],
-    "url": "moskva."
+    "vocabulary": ["москв", "мск", "moscow", "MSC", "MSK"],
+    "url": "moskva.",
+    "name": "В Москве"
   },
   "saint-petersburg": {
-    "name": ["санкт-петербург", "питер", "спб", "spb"],
-    "url": "spb."
+    "vocabulary": ["санкт-петербург", "питер", "спб", "spb"],
+    "url": "spb.",
+    "name": "В Питере"
   }
 }

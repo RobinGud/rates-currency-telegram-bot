@@ -144,9 +144,10 @@ const bot = new TelegramBot(token, { polling: true });
 
 let parse = (text, json) => {
   for (let obj in json) {
-    if (json[obj].name.some((el) => text.includes(el))) {
+    if (json[obj].vocabulary.some((el) => text.includes(el))) {
       // console.log(jsonValutes[valute].url);
-      return json[obj].url;
+      // console.log(json[obj]);
+      return json[obj];
     }
   }
   return "";
@@ -168,7 +169,7 @@ let parseDate = (text) => {
   let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
   let match = dateRegex.exec(text);
   if (match) {
-    console.log(match[1], match[2], match[5], "sdada");
+    // console.log(match[1], match[2], match[5], "sdada");
     day = match[1];
     month = match[2];
     year = match[5];
@@ -177,14 +178,14 @@ let parseDate = (text) => {
   // let day = match[1];
   if (!day) {
     day = new Date().getDate();
-    console.log(day);
+    // console.log(day);
   }
   if (day < 10) {
     day = "0" + day.toString();
   }
   if (!month) {
     month = "0" + (new Date().getMonth() + 1);
-    console.log(month);
+    // console.log(month);
   } else if (parseInt(month) >= 0) {
     month = match[2];
   } else {
@@ -227,7 +228,7 @@ let parseDate = (text) => {
   }
   if (!year) {
     year = new Date().getFullYear();
-    console.log(year);
+    // console.log(year);
   } else if (year < 100) {
     year = 2000 + match[5];
   }
@@ -243,9 +244,14 @@ let jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
 const osmosis = require("osmosis");
 
 let parseBanksRatesOneValute = (chatId, town, valute) => {
-  let resultString = "";
+  if (!town) {
+    town = { url: "", name: "В России" };
+    // town.url = "";
+    // town.name = "В Росиии";
+  }
+  let resultString = `Курс ${valute.name} ${town.name}\n\n`;
   osmosis
-    .get(`https://${town}bankiros.ru/currency/${valute}`)
+    .get(`https://${town.url}bankiros.ru/currency/${valute.url}`)
     .find("tbody > tr.productBank")
     .set(["td"])
     .data((data) => {
@@ -263,9 +269,9 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
 };
 
 let parseBanksRatesAllValutes = (chatId, town) => {
-  let resultString = "Лучшие курсы банков:\n\n";
+  let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
   osmosis
-    .get(`https://${town}bankiros.ru/currency/`)
+    .get(`https://${town.url}bankiros.ru/currency/`)
     .find("table.non-standard > tr")
     // .set(["td"])
     .set(["a", "span.conv-val"])
@@ -294,7 +300,7 @@ const request = require("request");
 const parser = require("fast-xml-parser");
 
 let CBReq = (chatId, date) => {
-  let resultString = "";
+  let resultString = `Курс ЦБ на ${date}\n\n`;
   request(
     {
       uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,

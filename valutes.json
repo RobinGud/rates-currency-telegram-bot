@@ -1,10 +1,12 @@
 {
   "dollar": {
-    "name": ["доллар", "долар", "usd", ",бакс", "dollar", "dolar"],
-    "url": "usd"
+    "vocabulary": ["доллар", "долар", "usd", ",бакс", "dollar", "dolar"],
+    "url": "usd",
+    "name": "доллара"
   },
   "euro": {
-    "name": ["евро", "euro", "eur"],
-    "url": "eur"
+    "vocabulary": ["евро", "euro", "eur"],
+    "url": "eur",
+    "name": "евро"
   }
 }
