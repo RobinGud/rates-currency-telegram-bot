@@ -250,6 +250,7 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
     // town.name = "В Росиии";
   }
   let resultString = `Курс ${valute.name} ${town.name}\n\n`;
+  let isEmpty = 1;
   osmosis
     .get(`https://${town.url}bankiros.ru/currency/${valute.url}`)
     .find("tbody > tr.productBank")
@@ -263,12 +264,24 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
         "\n   Продажа " +
         data[2] +
         "\n\n";
+      isEmpty = 0;
       // console.log(resultString);
     })
-    .done(() => bot.sendMessage(chatId, resultString));
+    .done(() => {
+      if (isEmpty) {
+        bot.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
+      } else {
+        bot.sendMessage(chatId, resultString);
+      }
+    });
 };
 
 let parseBanksRatesAllValutes = (chatId, town) => {
+  if (!town) {
+    town = { url: "", name: "В России" };
+    // town.url = "";
+    // town.name = "В Росиии";
+  }
   let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
   // console.log("i running");
   osmosis
@@ -277,7 +290,7 @@ let parseBanksRatesAllValutes = (chatId, town) => {
     // .set(["td"])
     .set(["a", "span.conv-val"])
     .data((data) => {
-      if (data.length == 6) {
+      if (data.length > 1) {
         resultString +=
           "" +
           data[0].toUpperCase() +
@@ -291,7 +304,7 @@ let parseBanksRatesAllValutes = (chatId, town) => {
           data[4] +
           "\n\n";
       }
-      // console.log(data);
+      console.log(data);
     })
     .done(() => bot.sendMessage(chatId, resultString));
 };
@@ -340,7 +353,7 @@ let CBReq = (chatId, date) => {
   );
 };
 
-bot.onText(/convert (\d.+) (.+) to (.+)/, function (msg, match) {
+bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
   let userId = msg.from.id;
   let valuteValue = match[1];
   let valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
@@ -433,5 +446,9 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
 
   //bot.sendMessage(chatId, valute + " " + town + " " + date);
 });
+
+// bot.onText(/\/start/, (msg) => {
+//   let chatId = msg.chat.id;
+// });
 
 bot.on("polling_error", (msg) => console.log(msg));
