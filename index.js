@@ -4,10 +4,9 @@ const osmosis = require("osmosis");
 const Iconv = require("iconv").Iconv;
 const request = require("request");
 const parser = require("fast-xml-parser");
-
 const TelegramBot = require("node-telegram-bot-api");
-const token = process.env.BOTAPI;
-const bot = new TelegramBot(token, { polling: true });
+
+const bot = new TelegramBot(process.env.BOTAPI, { polling: true });
 
 let jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
 let jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
