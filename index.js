@@ -5,6 +5,7 @@ const Iconv = require("iconv").Iconv;
 const request = require("request");
 const parser = require("fast-xml-parser");
 const TelegramBot = require("node-telegram-bot-api");
+const { get } = require("osmosis");
 
 const bot = new TelegramBot(process.env.BOTAPI, { polling: true });
 
@@ -45,10 +46,10 @@ let parseDate = (text) => {
       month = "0" + month.toString();
     }
   } else {
-    if (month == "янв" || month == "январь") {
+    if (month == "янв" || month == "января") {
       month = "01";
     }
-    if (month == "фев" || month == "февраль") {
+    if (month == "фев" || month == "февраля") {
       month = "02";
     }
     if (month == "мар" || month == "марта") {
@@ -69,7 +70,7 @@ let parseDate = (text) => {
     if (month == "авг" || month == "августа") {
       month = "08";
     }
-    if (month == "сен" || month == "сентябрь") {
+    if (month == "сен" || month == "сентября") {
       month = "09";
     }
     if (month == "окт" || month == "октября") {
@@ -87,7 +88,37 @@ let parseDate = (text) => {
   } else if (year < 100) {
     year = 2000 + parseInt(match[5]);
   }
+  if (isDateFuture(day, month, year)) {
+    return parseDate(" ");
+  }
   return day + "/" + month + "/" + year;
+};
+
+let isDateFuture = (day, month, year) => {
+  let today = new Date();
+  let todayDay = today.getDay();
+  let todayMonth = today.getMonth() + 1;
+  let todayYear = today.getFullYear();
+
+  if (year < todayYear) {
+    return false;
+  } else if (year > todayYear) {
+    return true;
+  } else {
+    if (parseInt(month) < todayMonth) {
+      return false;
+    } else if (parseInt(month) > todayMonth) {
+      return true;
+    } else {
+      if (parseInt(day) < todayDay) {
+        return false;
+      } else if (parseInt(day) > todayDay) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
 };
 
 let parseBanksRatesOneValute = (chatId, town, valute) => {
@@ -159,7 +190,7 @@ let CBReq = (chatId, date) => {
       encoding: "binary",
     },
     function (error, response, body) {
-      if (response.statusCode == 200) {
+      if (response && response.statusCode == 200) {
         body = new Buffer(body, "binary");
         body = conv.convert(body).toString();
 
@@ -311,3 +342,5 @@ bot.on("callback_query", (query) => {
 });
 
 bot.on("polling_error", (msg) => console.log(msg));
+
+module.exports = { parseDate, isDateFuture };
