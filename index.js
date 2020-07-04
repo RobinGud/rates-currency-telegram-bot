@@ -113,7 +113,6 @@ let parseDate = (text) => {
   if (yearBack) {
     return convertData(new Date(year - yearBack[1], month, day));
   }
-
   if (isDateFuture(day, month, year)) {
     return parseDate(" ");
   }
@@ -129,7 +128,7 @@ let convertData = (date) => {
 
 let isDateFuture = (day, month, year) => {
   let today = new Date();
-  let todayDay = today.getDay();
+  let todayDay = today.getDate();
   let todayMonth = today.getMonth() + 1;
   let todayYear = today.getFullYear();
 
