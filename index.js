@@ -5,7 +5,6 @@ const Iconv = require("iconv").Iconv;
 const request = require("request");
 const parser = require("fast-xml-parser");
 const TelegramBot = require("node-telegram-bot-api");
-const { get } = require("osmosis");
 
 const bot = new TelegramBot(process.env.BOTAPI, { polling: true });
 
@@ -90,30 +89,29 @@ let parseDate = (text) => {
   }
 
   if (/позавчера/.exec(text)) {
-    return foo(new Date(year, month, parseInt(day) - 2));
+    return convertData(new Date(year, month, parseInt(day) - 2));
   } else if (/вчера/.exec(text)) {
-    return foo(new Date(year, month, parseInt(day) - 1));
+    return convertData(new Date(year, month, parseInt(day) - 1));
   }
 
-    let dayBack = /(\d+) (дней|день) назад/.exec(text);
+  let dayBack = /(\d+) (дней|день) назад/.exec(text);
   if (dayBack) {
-    return foo(new Date(year, month, parseInt(day) - dayBack[1]));
+    return convertData(new Date(year, month, parseInt(day) - dayBack[1]));
   }
 
-      let weekBack = /(\d+) (недел.) назад/.exec(text);
-    if (weekBack) {
-      console.log(foo(new Date(year, month, parseInt(day) - weekBack[1] * 7)));
-    return foo(new Date(year, month, parseInt(day) - weekBack[1] * 7));
-    }
-
-    let monthBack = /(\d+) (месяц.+) назад/.exec(text);
-    if (monthBack) {
-    return foo(new Date(year, parseInt(month) - monthBack[1], day));
+  let weekBack = /(\d+) (недел.) назад/.exec(text);
+  if (weekBack) {
+    return convertData(new Date(year, month, parseInt(day) - weekBack[1] * 7));
   }
 
-      let yearBack = /(\d+) (год.|лет) назад/.exec(text);
-    if (yearBack) {
-    return foo(new Date(year - yearBack[1], month, day));
+  let monthBack = /(\d+) (месяц.+) назад/.exec(text);
+  if (monthBack) {
+    return convertData(new Date(year, parseInt(month) - monthBack[1], day));
+  }
+
+  let yearBack = /(\d+) (год.|лет) назад/.exec(text);
+  if (yearBack) {
+    return convertData(new Date(year - yearBack[1], month, day));
   }
 
   if (isDateFuture(day, month, year)) {
@@ -122,7 +120,7 @@ let parseDate = (text) => {
   return day + "/" + month + "/" + year;
 };
 
-let foo = (date) => {
+let convertData = (date) => {
   day = date.getDate();
   month = date.getMonth();
   year = date.getFullYear();
@@ -378,4 +376,8 @@ bot.on("callback_query", (query) => {
 
 bot.on("polling_error", (msg) => console.log(msg));
 
-module.exports = { parseDate, isDateFuture };
+module.exports = {
+  parseDate,
+  isDateFuture,
+  CBReq,
+};

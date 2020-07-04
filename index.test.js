@@ -1,12 +1,6 @@
-const fs = require("fs");
-
 const index = require("./index.js");
 
-test("My first test", () => {
-  expect(Math.max(1, 5, 10)).toBe(10);
-});
-
-test("Parse Date", () => {
+test("parseDate", () => {
   let year = new Date().getFullYear();
   expect(index.parseDate("1 янв")).toBe("01/01/" + year);
   expect(index.parseDate("4 ноя 00")).toBe("04/11/2000");
@@ -30,4 +24,8 @@ test("isDateFuture", () => {
   expect(index.isDateFuture(todayDay + 1, todayMonth, todayYear - 1)).toBe(
     false
   );
+});
+
+test("CBReq", () => {
+expect(index.CBReq(172315033, "22/07/2010"));
 });
