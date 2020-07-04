@@ -88,10 +88,45 @@ let parseDate = (text) => {
   } else if (year < 100) {
     year = 2000 + parseInt(match[5]);
   }
+
+  if (/позавчера/.exec(text)) {
+    return foo(new Date(year, month, parseInt(day) - 2));
+  } else if (/вчера/.exec(text)) {
+    return foo(new Date(year, month, parseInt(day) - 1));
+  }
+
+    let dayBack = /(\d+) (дней|день) назад/.exec(text);
+  if (dayBack) {
+    return foo(new Date(year, month, parseInt(day) - dayBack[1]));
+  }
+
+      let weekBack = /(\d+) (недел.) назад/.exec(text);
+    if (weekBack) {
+      console.log(foo(new Date(year, month, parseInt(day) - weekBack[1] * 7)));
+    return foo(new Date(year, month, parseInt(day) - weekBack[1] * 7));
+    }
+
+    let monthBack = /(\d+) (месяц.+) назад/.exec(text);
+    if (monthBack) {
+    return foo(new Date(year, parseInt(month) - monthBack[1], day));
+  }
+
+      let yearBack = /(\d+) (год.|лет) назад/.exec(text);
+    if (yearBack) {
+    return foo(new Date(year - yearBack[1], month, day));
+  }
+
   if (isDateFuture(day, month, year)) {
     return parseDate(" ");
   }
   return day + "/" + month + "/" + year;
+};
+
+let foo = (date) => {
+  day = date.getDate();
+  month = date.getMonth();
+  year = date.getFullYear();
+  return parseDate(day + " " + month + " " + year);
 };
 
 let isDateFuture = (day, month, year) => {
