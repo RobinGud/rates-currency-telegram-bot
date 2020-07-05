@@ -5,15 +5,22 @@ const Iconv = require("iconv").Iconv;
 const request = require("request");
 const parser = require("fast-xml-parser");
 const TelegramBot = require("node-telegram-bot-api");
+const winston = require("winston");
 
 const bot = new TelegramBot(process.env.BOTAPI, { polling: true });
 
-let jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
-let jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
+const logConfiguration = {
+  transports: [new winston.transports.File({ filename: "bot.log" })],
+};
 
-let conv = Iconv("windows-1251", "utf8");
+const logger = winston.createLogger(logConfiguration);
 
-let parse = (text, json) => {
+const jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
+const jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
+
+const conv = Iconv("windows-1251", "utf8");
+
+const parse = (text, json) => {
   for (let obj in json) {
     if (json[obj].vocabulary.some((el) => text.includes(el))) {
       return json[obj];
@@ -22,7 +29,7 @@ let parse = (text, json) => {
   return "";
 };
 
-let parseDate = (text) => {
+const parseDate = (text) => {
   let day, month, year;
   let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
   let match = dateRegex.exec(text);
@@ -119,14 +126,14 @@ let parseDate = (text) => {
   return day + "/" + month + "/" + year;
 };
 
-let convertData = (date) => {
+const convertData = (date) => {
   day = date.getDate();
   month = date.getMonth();
   year = date.getFullYear();
   return parseDate(day + " " + month + " " + year);
 };
 
-let isDateFuture = (day, month, year) => {
+const isDateFuture = (day, month, year) => {
   let today = new Date();
   let todayDay = today.getDate();
   let todayMonth = today.getMonth() + 1;
@@ -153,7 +160,7 @@ let isDateFuture = (day, month, year) => {
   }
 };
 
-let parseBanksRatesOneValute = (chatId, town, valute) => {
+const parseBanksRatesOneValute = (chatId, town, valute) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
@@ -174,7 +181,7 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
         "\n\n";
       isEmpty = 0;
     })
-    .error(console.warn)
+    .error(logger.error)
     .done(() => {
       if (isEmpty) {
         bot.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
@@ -184,7 +191,7 @@ let parseBanksRatesOneValute = (chatId, town, valute) => {
     });
 };
 
-let parseBanksRatesAllValutes = (chatId, town) => {
+const parseBanksRatesAllValutes = (chatId, town) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
@@ -209,11 +216,13 @@ let parseBanksRatesAllValutes = (chatId, town) => {
           "\n\n";
       }
     })
-    .error(console.warn)
-    .done(() => bot.sendMessage(chatId, resultString));
+    .error(logger.error)
+    .done(() => {
+      bot.sendMessage(chatId, resultString);
+    });
 };
 
-let CBReq = (chatId, date) => {
+const CBReq = (chatId, date) => {
   let resultString = `Курс ЦБ на ${date}\n\n`;
   request(
     {
@@ -228,6 +237,9 @@ let CBReq = (chatId, date) => {
 
         if (parser.validate(body) === true) {
           var jsonObj = parser.parse(body).ValCurs.Valute || {};
+          if (Object.keys(jsonObj).length === 0) {
+            logger.error(`${JSON.stringify(response)}`);
+          }
           for (let i = 0; i < jsonObj.length; i++) {
             resultString +=
               "[" +
@@ -243,7 +255,7 @@ let CBReq = (chatId, date) => {
           bot.sendMessage(chatId, resultString);
         }
       } else {
-        console.warn(error);
+        logger.error(error);
       }
     }
   );
@@ -264,12 +276,15 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
       encoding: "binary",
     },
     function (error, response, body) {
-      if (response.statusCode == 200) {
+      if (response && response.statusCode == 200) {
         body = new Buffer(body, "binary");
         body = conv.convert(body).toString();
 
         if (parser.validate(body) === true) {
           var jsonObj = parser.parse(body).ValCurs.Valute || {};
+          if (Object.keys(jsonObj).length === 0) {
+            logger.error(`${JSON.stringify(response)}`);
+          }
           for (let i = 0; i < jsonObj.length; i++) {
             if (jsonObj[i].CharCode.toLowerCase() == valuteFrom) {
               nominalFrom = jsonObj[i].Nominal;
@@ -308,7 +323,7 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
           bot.sendMessage(userId, Result + " " + valuteTo);
         }
       } else {
-        console.warn(error);
+        logger.error(error);
       }
     }
   );
@@ -320,6 +335,9 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   let valute = parse(text, jsonValutes);
   let town = parse(text, jsonTowns);
   let date = parseDate(text);
+  logger.info(
+    `id: ${chatId} send message: ${text}, parse data: ${valute.name} ${town.name} ${date}`
+  );
   if (/цб/.test(text)) {
     CBReq(chatId, date);
   } else if (!valute) {

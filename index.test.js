@@ -12,7 +12,7 @@ test("parseDate", () => {
 
 test("isDateFuture", () => {
   let today = new Date();
-  let todayDay = today.getDay();
+  let todayDay = today.getDate();
   let todayMonth = today.getMonth() + 1;
   let todayYear = today.getFullYear();
   expect(index.isDateFuture(todayDay, todayMonth, todayYear + 1)).toBe(true);
@@ -27,5 +27,5 @@ test("isDateFuture", () => {
 });
 
 test("CBReq", () => {
-expect(index.CBReq(172315033, "22/07/2010"));
+  expect(index.CBReq(172315033, "22/07/2010"));
 });
