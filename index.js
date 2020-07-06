@@ -268,6 +268,18 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
   let valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
   let date = parseDate(" ");
   let nominalFrom, nominalTo, valueFrom, valueTo;
+  rubRegex = /rub|рубл/;
+
+  if (!valuteTo && rubRegex.test(match[3].toLowerCase())) {
+    nominalTo = 1;
+    valueTo = 1;
+    valuteTo = "rub";
+  }
+
+  if (!valuteFrom && rubRegex.test(match[2].toLowerCase())) {
+    nominalFrom = 1;
+    valueFrom = 1;
+  }
 
   request(
     {
@@ -298,15 +310,6 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
               valueTo = parseFloat(
                 jsonObj[i].Value.replace(",", ".").replace(" ", "")
               );
-            }
-            if (valuteTo == "RUB") {
-              nominalTo = 1;
-              valueTo = 1;
-            }
-
-            if (valuteFrom == "RUB") {
-              nominalFrom = 1;
-              valueFrom = 1;
             }
           }
 
