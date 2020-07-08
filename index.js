@@ -31,8 +31,8 @@ const parse = (text, json) => {
 
 const parseDate = (text) => {
   let day, month, year;
-  let dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
-  let match = dateRegex.exec(text);
+  const dateRegex = /(0?[1-9]|[12][0-9]|3[01])[\/\-\. ](0?[1-9]|1[012]|(янв(?:аря)?|фев(?:раля)?|мар(?:та)?|апр(?:еля)?|мая|июн(?:я)?|июл(?:я)?|авг(?:уста)?|сен(?:тября)?|окт(?:ября)?|ноя(?:бря)?|дек(?:абря)?))($|[ \/\.\-\n]([0-9]{2,4})?)/;
+  const match = dateRegex.exec(text);
   if (match) {
     day = match[1];
     month = match[2];
@@ -101,22 +101,22 @@ const parseDate = (text) => {
     return convertData(new Date(year, month, parseInt(day) - 1));
   }
 
-  let dayBack = /(\d+) (дней|день) назад/.exec(text);
+  const dayBack = /(\d+) (дней|день) назад/.exec(text);
   if (dayBack) {
     return convertData(new Date(year, month, parseInt(day) - dayBack[1]));
   }
 
-  let weekBack = /(\d+) (недел.) назад/.exec(text);
+  const weekBack = /(\d+) (недел.) назад/.exec(text);
   if (weekBack) {
     return convertData(new Date(year, month, parseInt(day) - weekBack[1] * 7));
   }
 
-  let monthBack = /(\d+) (месяц.+) назад/.exec(text);
+  const monthBack = /(\d+) (месяц.+) назад/.exec(text);
   if (monthBack) {
     return convertData(new Date(year, parseInt(month) - monthBack[1], day));
   }
 
-  let yearBack = /(\d+) (год.|лет) назад/.exec(text);
+  const yearBack = /(\d+) (год.|лет) назад/.exec(text);
   if (yearBack) {
     return convertData(new Date(year - yearBack[1], month, day));
   }
@@ -262,11 +262,11 @@ const CBReq = (chatId, date) => {
 };
 
 bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
-  let userId = msg.from.id;
-  let valuteValue = match[1];
-  let valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
-  let valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
-  let date = parseDate(" ");
+  const userId = msg.from.id;
+  const valuteValue = match[1];
+  const valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
+  const valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
+  const date = parseDate(" ");
   let nominalFrom, nominalTo, valueFrom, valueTo;
   rubRegex = /rub|рубл/;
 
@@ -318,7 +318,7 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
             return;
           }
 
-          let Result = (
+          const Result = (
             ((valuteValue / nominalFrom) * valueFrom * nominalTo) /
             valueTo
           ).toFixed(4);
@@ -333,11 +333,11 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
 });
 
 bot.onText(/курс|curs|Курс|Curs/, (msg) => {
-  let chatId = msg.chat.id;
-  let text = msg.text.toLowerCase();
-  let valute = parse(text, jsonValutes);
-  let town = parse(text, jsonTowns);
-  let date = parseDate(text);
+  const chatId = msg.chat.id;
+  const text = msg.text.toLowerCase();
+  const valute = parse(text, jsonValutes);
+  const town = parse(text, jsonTowns);
+  const date = parseDate(text);
   logger.info(
     `id: ${chatId} send message: ${text}, parse data: ${valute.name} ${town.name} ${date}`
   );
@@ -351,7 +351,7 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
 });
 
 bot.onText(/\/start/, (msg) => {
-  let chatId = msg.chat.id;
+  const chatId = msg.chat.id;
   bot.sendMessage(chatId, "Добрый день", {
     reply_markup: {
       inline_keyboard: [
