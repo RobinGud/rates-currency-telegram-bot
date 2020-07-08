@@ -42,14 +42,14 @@ const parseDate = (text) => {
     day = new Date().getDate();
   }
   if (day < 10) {
-    day = "0" + day.toString();
+    day = "0" + parseInt(day).toString();
   }
   if (!month) {
     month = "0" + (new Date().getMonth() + 1);
   } else if (month >= 0) {
     month = match[2];
     if (month < 10) {
-      month = "0" + month.toString();
+      month = "0" + parseInt(month).toString();
     }
   } else {
     if (month == "янв" || month == "января") {

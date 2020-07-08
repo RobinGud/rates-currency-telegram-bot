@@ -8,6 +8,7 @@ test("parseDate", () => {
   expect(index.parseDate("2 февраля 2002")).toBe("02/02/2002");
   expect(index.parseDate("1 1")).toBe("01/01/" + year);
   expect(index.parseDate("3 2 20")).toBe("03/02/2020");
+  expect(index.parseDate("01 01 20")).toBe("01/01/2020");
 });
 
 test("isDateFuture", () => {
