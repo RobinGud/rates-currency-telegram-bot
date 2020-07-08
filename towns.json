@@ -133,5 +133,10 @@
     "vocabulary": ["новосибирск", "новосиб"],
     "url": "novosibirsk.",
     "name": "в Новосибирске"
+  },
+  "all-russia": {
+    "vocabulary": ["росси", "роси"],
+    "url": "",
+    "name": "в России"
   }
 }

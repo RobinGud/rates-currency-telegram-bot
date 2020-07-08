@@ -142,9 +142,6 @@ const isDateFuture = (day, month, year) => {
 };
 
 const parseBanksRatesOneCurrency = (town, currency, onDone) => {
-  if (!town) {
-    town = { url: "", name: "В России" };
-  }
   let resultString = `Курс ${currency.name} ${town.name}\n\n`;
   let isEmpty = 1;
   osmosis
@@ -166,9 +163,6 @@ const parseBanksRatesOneCurrency = (town, currency, onDone) => {
 };
 
 const parseBanksRatesAllCurrency = (town, onDone) => {
-  if (!town) {
-    town = { url: "", name: "В России" };
-  }
   let resultString = `Лучшие курсы валют ${town.name}:\n\n`;
   osmosis
     .get(`https://${town.url}bankiros.ru/currency/`)
@@ -305,9 +299,13 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
       bot.sendMessage(chatId, resultString);
     });
   } else {
-    parseBanksRatesOneCurrency(town, currency, (response) => {
-      bot.sendMessage(chatId, response);
-    });
+    if (town) {
+      parseBanksRatesOneCurrency(town, currency, (response) => {
+        bot.sendMessage(chatId, response);
+      });
+    } else {
+      bot.sendMessage(chatId, "Вы не указали город!");
+    }
   }
 });
 
