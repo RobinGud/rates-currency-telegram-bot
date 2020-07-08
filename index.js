@@ -152,14 +152,7 @@ const parseBanksRatesOneValute = (chatId, town, valute) => {
     .find("tbody > tr.productBank")
     .set(["td"])
     .data((data) => {
-      resultString +=
-        "" +
-        data[0] +
-        "\n   Покупка  " +
-        data[1] +
-        "\n   Продажа " +
-        data[2] +
-        "\n\n";
+      resultString += `${data[0]} \n Покупка  ${data[1]} \n Продажа ${data[2]} \n\n`;
       isEmpty = 0;
     })
     .error(logger.error)
@@ -183,18 +176,9 @@ const parseBanksRatesAllValutes = (chatId, town) => {
     .set(["a", "span.conv-val"])
     .data((data) => {
       if (data.length > 1) {
-        resultString +=
-          "" +
-          data[0].toUpperCase() +
-          "\n " +
-          data[1] +
-          "\n   Покупка    " +
-          data[3] +
-          "\n " +
-          data[2] +
-          "\n   Продажа   " +
-          data[4] +
-          "\n\n";
+        resultString += `${data[0].toUpperCase()} \n ${data[1]} \n  Покупка  ${
+          data[3]
+        } \n ${data[2]} \n  Продажа ${data[4]} \n\n`;
       }
     })
     .error(logger.error)
@@ -222,16 +206,7 @@ const CBReq = (chatId, date) => {
             logger.error(`${JSON.stringify(response)}`);
           }
           for (let i = 0; i < jsonObj.length; i++) {
-            resultString +=
-              "[" +
-              jsonObj[i].CharCode +
-              "]  " +
-              jsonObj[i].Name +
-              " x" +
-              jsonObj[i].Nominal +
-              "\n  " +
-              jsonObj[i].Value +
-              "\n\n";
+            resultString += `[${jsonObj[i].CharCode}] ${jsonObj[i].Name} x${jsonObj[i].Nominal} \n ${jsonObj[i].Value} \n\n`;
           }
           bot.sendMessage(chatId, resultString);
         }
