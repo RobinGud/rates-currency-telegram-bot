@@ -179,7 +179,7 @@ const parseBanksRatesAllCurrency = (town, onDone) => {
     .done(() => onDone(resultString));
 };
 
-const CBReq = (date, onComplete) => {
+const parseCurrencyRatesCBR = (date, onComplete) => {
   request(
     {
       uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
@@ -220,6 +220,10 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
   let currencyTo = parse(match[3].toLowerCase(), jsonCurrency).url;
   let nominalFrom, nominalTo, valueFrom, valueTo;
   let rubRegex = /rub|рубл/;
+
+  logger.info(
+    `id: ${chatId} send message: ${msg.text}, parse data: ${currencyValue} ${currencyFrom} ${currencyTo}`
+  );
 
   if (!currencyTo && rubRegex.test(match[3].toLowerCase())) {
     nominalTo = 1;
@@ -293,7 +297,9 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
     `id: ${chatId} send message: ${text}, parse data: ${currency.name} ${town.name} ${date}`
   );
   if (/цб/.test(text)) {
-    CBReq(date, (resultString) => bot.sendMessage(chatId, resultString));
+    parseCurrencyRatesCBR(date, (resultString) =>
+      bot.sendMessage(chatId, resultString)
+    );
   } else if (!currency) {
     parseBanksRatesAllCurrency(town, (resultString) => {
       bot.sendMessage(chatId, resultString);
@@ -353,10 +359,9 @@ bot.on("callback_query", (query) => {
   }
 });
 
-bot.on("polling_error", (msg) => console.log(msg));
+bot.on("polling_error", (msg) => logger.error(msg));
 
 module.exports = {
   parseDate,
   isDateFuture,
-  CBReq,
 };
