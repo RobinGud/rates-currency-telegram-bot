@@ -141,7 +141,7 @@ const isDateFuture = (day, month, year) => {
   }
 };
 
-const parseBanksRatesOneValute = (chatId, town, valute) => {
+const parseBanksRatesOneValute = (town, valute, onDone) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
@@ -158,14 +158,14 @@ const parseBanksRatesOneValute = (chatId, town, valute) => {
     .error(logger.error)
     .done(() => {
       if (isEmpty) {
-        bot.sendMessage(chatId, `${town.name} не обменивают ${valute.name}`);
-      } else {
-        bot.sendMessage(chatId, resultString);
+        resultString = `${town.name} не обменивают ${valute.name}`;
       }
+
+      onDone(resultString);
     });
 };
 
-const parseBanksRatesAllValutes = (chatId, town) => {
+const parseBanksRatesAllValutes = (town, onDone) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
@@ -182,13 +182,10 @@ const parseBanksRatesAllValutes = (chatId, town) => {
       }
     })
     .error(logger.error)
-    .done(() => {
-      bot.sendMessage(chatId, resultString);
-    });
+    .done(() => onDone(resultString));
 };
 
-const CBReq = (chatId, date) => {
-  let resultString = `Курс ЦБ на ${date}\n\n`;
+const CBReq = (date, onComplete) => {
   request(
     {
       uri: `http://www.cbr.ru/scripts/XML_daily.asp?date_req=${date}`,
@@ -196,19 +193,23 @@ const CBReq = (chatId, date) => {
       encoding: "binary",
     },
     function (error, response, body) {
+      let resultString = `Курс ЦБ на ${date}\n\n`;
       if (response && response.statusCode == 200) {
         body = new Buffer(body, "binary");
         body = conv.convert(body).toString();
 
         if (parser.validate(body) === true) {
           var jsonObj = parser.parse(body).ValCurs.Valute || {};
+
           if (Object.keys(jsonObj).length === 0) {
             logger.error(`${JSON.stringify(response)}`);
           }
+
           for (let i = 0; i < jsonObj.length; i++) {
             resultString += `[${jsonObj[i].CharCode}] ${jsonObj[i].Name} x${jsonObj[i].Nominal} \n ${jsonObj[i].Value} \n\n`;
           }
-          bot.sendMessage(chatId, resultString);
+
+          onComplete(resultString);
         }
       } else {
         logger.error(error);
@@ -218,13 +219,13 @@ const CBReq = (chatId, date) => {
 };
 
 bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
-  const userId = msg.from.id;
+  const chatId = msg.chat.id;
+  const date = parseDate(" ");
   const valuteValue = match[1];
   const valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
-  const valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
-  const date = parseDate(" ");
+  let valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
   let nominalFrom, nominalTo, valueFrom, valueTo;
-  rubRegex = /rub|рубл/;
+  let rubRegex = /rub|рубл/;
 
   if (!valuteTo && rubRegex.test(match[3].toLowerCase())) {
     nominalTo = 1;
@@ -270,7 +271,7 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
           }
 
           if (!valueFrom || !valueTo) {
-            bot.sendMessage(userId, "Невалидная валюта, попробуйте снова!");
+            bot.sendMessage(chatId, "Невалидная валюта, попробуйте снова!");
             return;
           }
 
@@ -279,7 +280,7 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
             valueTo
           ).toFixed(4);
 
-          bot.sendMessage(userId, Result + " " + valuteTo);
+          bot.sendMessage(chatId, Result + " " + valuteTo);
         }
       } else {
         logger.error(error);
@@ -298,11 +299,15 @@ bot.onText(/курс|curs|Курс|Curs/, (msg) => {
     `id: ${chatId} send message: ${text}, parse data: ${valute.name} ${town.name} ${date}`
   );
   if (/цб/.test(text)) {
-    CBReq(chatId, date);
+    CBReq(date, (resultString) => bot.sendMessage(chatId, resultString));
   } else if (!valute) {
-    parseBanksRatesAllValutes(chatId, town);
+    parseBanksRatesAllValutes(town, (resultString) => {
+      bot.sendMessage(chatId, resultString);
+    });
   } else {
-    parseBanksRatesOneValute(chatId, town, valute);
+    parseBanksRatesOneValute(town, valute, (response) => {
+      bot.sendMessage(chatId, response);
+    });
   }
 });
 
