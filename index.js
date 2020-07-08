@@ -15,7 +15,7 @@ const logConfiguration = {
 
 const logger = winston.createLogger(logConfiguration);
 
-const jsonValutes = JSON.parse(fs.readFileSync("valutes.json", "utf8"));
+const jsonCurrency = JSON.parse(fs.readFileSync("currency.json", "utf8"));
 const jsonTowns = JSON.parse(fs.readFileSync("towns.json", "utf8"));
 
 const conv = Iconv("windows-1251", "utf8");
@@ -141,14 +141,14 @@ const isDateFuture = (day, month, year) => {
   }
 };
 
-const parseBanksRatesOneValute = (town, valute, onDone) => {
+const parseBanksRatesOneCurrency = (town, currency, onDone) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
-  let resultString = `Курс ${valute.name} ${town.name}\n\n`;
+  let resultString = `Курс ${currency.name} ${town.name}\n\n`;
   let isEmpty = 1;
   osmosis
-    .get(`https://${town.url}bankiros.ru/currency/${valute.url}`)
+    .get(`https://${town.url}bankiros.ru/currency/${currency.url}`)
     .find("tbody > tr.productBank")
     .set(["td"])
     .data((data) => {
@@ -158,14 +158,14 @@ const parseBanksRatesOneValute = (town, valute, onDone) => {
     .error(logger.error)
     .done(() => {
       if (isEmpty) {
-        resultString = `${town.name} не обменивают ${valute.name}`;
+        resultString = `${town.name} не обменивают ${currency.name}`;
       }
 
       onDone(resultString);
     });
 };
 
-const parseBanksRatesAllValutes = (town, onDone) => {
+const parseBanksRatesAllCurrency = (town, onDone) => {
   if (!town) {
     town = { url: "", name: "В России" };
   }
@@ -221,19 +221,19 @@ const CBReq = (date, onComplete) => {
 bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
   const chatId = msg.chat.id;
   const date = parseDate(" ");
-  const valuteValue = match[1];
-  const valuteFrom = parse(match[2].toLowerCase(), jsonValutes).url;
-  let valuteTo = parse(match[3].toLowerCase(), jsonValutes).url;
+  const currencyValue = match[1];
+  const currencyFrom = parse(match[2].toLowerCase(), jsonCurrency).url;
+  let currencyTo = parse(match[3].toLowerCase(), jsonCurrency).url;
   let nominalFrom, nominalTo, valueFrom, valueTo;
   let rubRegex = /rub|рубл/;
 
-  if (!valuteTo && rubRegex.test(match[3].toLowerCase())) {
+  if (!currencyTo && rubRegex.test(match[3].toLowerCase())) {
     nominalTo = 1;
     valueTo = 1;
-    valuteTo = "rub";
+    currencyTo = "rub";
   }
 
-  if (!valuteFrom && rubRegex.test(match[2].toLowerCase())) {
+  if (!currencyFrom && rubRegex.test(match[2].toLowerCase())) {
     nominalFrom = 1;
     valueFrom = 1;
   }
@@ -255,14 +255,14 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
             logger.error(`${JSON.stringify(response)}`);
           }
           for (let i = 0; i < jsonObj.length; i++) {
-            if (jsonObj[i].CharCode.toLowerCase() == valuteFrom) {
+            if (jsonObj[i].CharCode.toLowerCase() == currencyFrom) {
               nominalFrom = jsonObj[i].Nominal;
               valueFrom = parseFloat(
                 jsonObj[i].Value.replace(",", ".").replace(" ", "")
               );
             }
 
-            if (jsonObj[i].CharCode.toLowerCase() == valuteTo) {
+            if (jsonObj[i].CharCode.toLowerCase() == currencyTo) {
               nominalTo = jsonObj[i].Nominal;
               valueTo = parseFloat(
                 jsonObj[i].Value.replace(",", ".").replace(" ", "")
@@ -276,11 +276,11 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
           }
 
           const Result = (
-            ((valuteValue / nominalFrom) * valueFrom * nominalTo) /
+            ((currencyValue / nominalFrom) * valueFrom * nominalTo) /
             valueTo
           ).toFixed(4);
 
-          bot.sendMessage(chatId, Result + " " + valuteTo);
+          bot.sendMessage(chatId, Result + " " + currencyTo);
         }
       } else {
         logger.error(error);
@@ -292,20 +292,20 @@ bot.onText(/(\d.+) (.+) в (.+)/, function (msg, match) {
 bot.onText(/курс|curs|Курс|Curs/, (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text.toLowerCase();
-  const valute = parse(text, jsonValutes);
+  const currency = parse(text, jsonCurrency);
   const town = parse(text, jsonTowns);
   const date = parseDate(text);
   logger.info(
-    `id: ${chatId} send message: ${text}, parse data: ${valute.name} ${town.name} ${date}`
+    `id: ${chatId} send message: ${text}, parse data: ${currency.name} ${town.name} ${date}`
   );
   if (/цб/.test(text)) {
     CBReq(date, (resultString) => bot.sendMessage(chatId, resultString));
-  } else if (!valute) {
-    parseBanksRatesAllValutes(town, (resultString) => {
+  } else if (!currency) {
+    parseBanksRatesAllCurrency(town, (resultString) => {
       bot.sendMessage(chatId, resultString);
     });
   } else {
-    parseBanksRatesOneValute(town, valute, (response) => {
+    parseBanksRatesOneCurrency(town, currency, (response) => {
       bot.sendMessage(chatId, response);
     });
   }
