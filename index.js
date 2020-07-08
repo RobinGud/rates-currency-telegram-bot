@@ -134,29 +134,10 @@ const convertData = (date) => {
 };
 
 const isDateFuture = (day, month, year) => {
-  let today = new Date();
-  let todayDay = today.getDate();
-  let todayMonth = today.getMonth() + 1;
-  let todayYear = today.getFullYear();
-
-  if (year < todayYear) {
-    return false;
-  } else if (year > todayYear) {
+  if (new Date() - new Date(year, month - 1, day) < 0) {
     return true;
   } else {
-    if (parseInt(month) < todayMonth) {
-      return false;
-    } else if (parseInt(month) > todayMonth) {
-      return true;
-    } else {
-      if (parseInt(day) < todayDay) {
-        return false;
-      } else if (parseInt(day) > todayDay) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+    return false;
   }
 };
 
